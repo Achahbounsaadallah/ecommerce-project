@@ -17,4 +17,6 @@ public class ProductRequestDTO {
 
     @PositiveOrZero
     private int quantity;
+
+    private String category;
 }
