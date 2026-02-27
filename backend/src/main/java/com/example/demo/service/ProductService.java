@@ -21,6 +21,8 @@ public class ProductService {
         product.setPrice(dto.getPrice());
         product.setQuantity(dto.getQuantity());
         product.setCategory(dto.getCategory());
+        product.setImage(dto.getImage());
+        product.setEmoji(dto.getEmoji());
 
         return productRepository.save(product);
     }
@@ -30,6 +32,6 @@ public class ProductService {
     }
 
     public List<Product> getProductsByCategory(String category) {
-        return productRepository.findByCategory(category);
+        return productRepository.findByCategoryIgnoreCase(category);
     }
 }

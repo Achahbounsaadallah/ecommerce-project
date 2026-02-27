@@ -37,7 +37,7 @@ public class UserService {
 
     public JwtResponse authenticateUser(LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication.getName());
@@ -47,7 +47,7 @@ public class UserService {
                 .map(item -> item.getAuthority())
                 .collect(Collectors.toList());
 
-        User user = userRepository.findByUsername(loginRequest.getUsername()).orElse(null);
+        User user = userRepository.findByEmail(loginRequest.getEmail()).orElse(null);
 
         return new JwtResponse(jwt,
                 user != null ? user.getId() : null,

@@ -2,9 +2,21 @@ import { useState } from "react";
 
 function ProductCard({ product, showDetails = false, onAddToCart, delay = 0 }) {
   const [added, setAdded] = useState(false);
+  const productId = product._id || product.id;
+
+  const getEmojiByCategory = (category) => {
+    if (!category) return "📦";
+    const cat = category.toUpperCase();
+    if (cat.includes("SMARTPHONE")) return "📱";
+    if (cat.includes("SMARTWATCH") || cat.includes("WATCH")) return "⌚";
+    if (cat.includes("ACCESSORY") || cat.includes("AIRPODS")) return "🎧";
+    return "📦";
+  };
+
+  const emoji = product.emoji || getEmojiByCategory(product.category);
 
   const handleAdd = () => {
-    if (onAddToCart) onAddToCart(product);
+    if (onAddToCart) onAddToCart({ ...product, id: productId });
     setAdded(true);
     setTimeout(() => setAdded(false), 1800);
   };
@@ -31,7 +43,7 @@ function ProductCard({ product, showDetails = false, onAddToCart, delay = 0 }) {
         {product.image ? (
           <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
         ) : (
-          <span className="text-5xl">{product.emoji || "📦"}</span>
+          <span className="text-5xl">{emoji}</span>
         )}
       </div>
 

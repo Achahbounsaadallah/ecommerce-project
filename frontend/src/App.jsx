@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import Navbar           from "./components/Header/navbar";
@@ -8,15 +8,80 @@ import SmartwatchesPage from "./pages/SmartwatchesPage";
 import AccessoiresPage  from "./pages/AccessoiresPage";
 import ContactPage      from "./pages/ContactPage";
 import Login            from "./pages/Login";
+import Profile          from "./pages/Profile";
+import PaymentMethods   from "./pages/PaymentMethods";
+import Orders           from "./pages/Orders";
+import Cart             from "./pages/Cart";
 
 function App() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [cart, setCart]               = useState([]);
+  // structure will mirror backend CartResponse
+  const [cart, setCart]               = useState({ items: [], totalPrice: 0, totalQuantity: 0 });
   const [toastMsg, setToastMsg]       = useState(null);
 
-  const addToCart = (product) => {
-    setCart((prev) => [...prev, product]);
-    setToastMsg(`${product.name} ajouté !`);
+  // Fetch current cart from server
+  const fetchCart = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    try {
+      const res = await fetch("/api/cart", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setCart(data);
+      } else {
+        console.warn("could not fetch cart", data.message);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    fetchCart();
+  }, []);
+
+  const addToCart = async (product) => {
+    const token = localStorage.getItem("token");
+    
+    try {
+      const res = await fetch("/api/cart/add", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token && { Authorization: `Bearer ${token}` })
+        },
+        body: JSON.stringify({ productId: product._id || product.id, quantity: 1 })
+      });
+      
+      console.log("Response status:", res.status);
+      console.log("Response headers:", res.headers.get('content-type'));
+      
+      // Check response type
+      const contentType = res.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await res.text();
+        console.error("Server returned non-JSON response:", text);
+        setToastMsg("Erreur serveur: réponse invalide");
+        setTimeout(() => setToastMsg(null), 2500);
+        return;
+      }
+      
+      const data = await res.json();
+      console.log("Cart data:", data);
+      
+      if (res.ok) {
+        setCart(data);
+        setToastMsg(`${product.name} ajouté !`);
+      } else {
+        setToastMsg(data.message || "Erreur lors de l'ajout");
+      }
+    } catch (err) {
+      console.error("addToCart error:", err);
+      setToastMsg(`Erreur réseau: ${err.message}`);
+    }
+
     setTimeout(() => setToastMsg(null), 2500);
   };
 
@@ -34,7 +99,7 @@ function App() {
         <Navbar
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
-          cartCount={cart.length}
+          cartCount={cart.totalQuantity || 0}
         />
 
         <main>
@@ -45,6 +110,10 @@ function App() {
             <Route path="/accessoires"  element={<AccessoiresPage  onAddToCart={addToCart} />} />
             <Route path="/contact"      element={<ContactPage />} />
             <Route path="/login"        element={<Login />} />
+            <Route path="/profile"      element={<Profile />} />
+            <Route path="/payment-methods" element={<PaymentMethods />} />
+            <Route path="/orders"       element={<Orders />} />
+            <Route path="/cart"         element={<Cart cart={cart} fetchCart={fetchCart} />} />
           </Routes>
         </main>
 

@@ -1,7 +1,33 @@
-import products from "../data/products";
+import { useState, useEffect } from "react";
 import ProductCard from "../components/ProductCard";
 
 function Home({ searchQuery, onAddToCart }) {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await fetch("/api/products");
+        const data = await res.json();
+        setProducts(data);
+      } catch (err) {
+        console.error("Erreur chargement produits:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto px-6 pb-20 text-center text-white/60 py-20">
+        Chargement...
+      </div>
+    );
+  }
+
   const filtered = products.filter((p) =>
     p.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -27,7 +53,7 @@ function Home({ searchQuery, onAddToCart }) {
           </p>
 
           <div className="flex justify-center gap-12 flex-wrap">
-            {[["12+", "Produits"], ["3", "Catégories"], ["100%", "Authentique"]].map(([val, lbl]) => (
+            {[[filtered.length, "Produits"], ["3", "Catégories"], ["100%", "Authentique"]].map(([val, lbl]) => (
               <div key={lbl} className="text-center">
                 <div className="font-serif font-black text-3xl text-violet-400">{val}</div>
                 <div className="text-[11px] text-white/30 uppercase tracking-widest mt-1">{lbl}</div>

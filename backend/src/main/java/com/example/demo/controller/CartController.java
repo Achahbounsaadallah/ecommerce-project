@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/cart")
-@PreAuthorize("hasRole('USER')")
 @CrossOrigin(origins = "*")
 public class CartController {
     
@@ -29,7 +28,7 @@ public class CartController {
             @RequestBody AddToCartRequest request,
             Authentication authentication) {
         try {
-            String userId = authentication.getName();
+            String userId = authentication != null ? authentication.getName() : "anonymous_user";
             CartResponse response = cartService.addToCart(userId, request);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
@@ -48,7 +47,7 @@ public class CartController {
             @PathVariable String productId,
             Authentication authentication) {
         try {
-            String userId = authentication.getName();
+            String userId = authentication != null ? authentication.getName() : "anonymous_user";
             CartResponse response = cartService.removeFromCart(userId, productId);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
@@ -67,7 +66,7 @@ public class CartController {
             @RequestBody UpdateCartItemRequest request,
             Authentication authentication) {
         try {
-            String userId = authentication.getName();
+            String userId = authentication != null ? authentication.getName() : "anonymous_user";
             CartResponse response = cartService.updateQuantity(userId, request);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
@@ -84,7 +83,7 @@ public class CartController {
     @GetMapping
     public ResponseEntity<CartResponse> getCart(Authentication authentication) {
         try {
-            String userId = authentication.getName();
+            String userId = authentication != null ? authentication.getName() : "anonymous_user";
             CartResponse response = cartService.getCart(userId);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
@@ -101,7 +100,7 @@ public class CartController {
     @DeleteMapping("/clear")
     public ResponseEntity<CartResponse> clearCart(Authentication authentication) {
         try {
-            String userId = authentication.getName();
+            String userId = authentication != null ? authentication.getName() : "anonymous_user";
             CartResponse response = cartService.clearCart(userId);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
