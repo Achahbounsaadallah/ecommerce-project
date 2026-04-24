@@ -55,15 +55,3 @@ Located in the `frontend/` folder.
    ```
 3. The frontend will typically be available at `http://localhost:3000` and will communicate with the backend API (e.g., `http://localhost:8080`).
 
-## Notes
-
-- Ensure MongoDB is running and configured correctly in `application.properties`.
-- JWT secrets and other sensitive settings should be managed securely for production.
-
-## Contribution
-
-Feel free to fork the repo and submit pull requests. Ensure to follow coding standards for both Java and JavaScript.
-
----
-
-This README provides a high-level description of the project structure, setup, and how to run both frontend and backend components.
